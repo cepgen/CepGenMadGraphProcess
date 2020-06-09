@@ -1,4 +1,4 @@
-      subroutine jw3wxx(w1,w2,w3,g1,g2,vmass,vwidth , jw3w)
+      subroutine jw3wnx(w1,w2,w3,g1,g2,vmass,vwidth , jw3w)
 c
 c This subroutine computes an off-shell W+, W-, W3, Z or photon current
 c from the four-point gauge boson coupling.  The vector propagator is
@@ -46,7 +46,7 @@ c where all the bosons are defined by the flowing-OUT quantum number.
 c
 c output:
 c       complex jw3w(6)        : W current             j^mu(w':w1,w2,w3)
-c     
+c
       implicit none
       double complex w1(6),w2(6),w3(6),jw3w(6)
       double complex dw1(0:3),dw2(0:3),dw3(0:3)
@@ -55,7 +55,7 @@ c
       double precision g1,g2,vmass,vwidth
       double precision p1(0:3),p2(0:3),p3(0:3),q(0:3)
       double precision dg2,dmv,dwv,mv2,q2
-
+      double complex cZero
       double precision rZero, rOne, rTwo
       parameter( rZero = 0.0d0, rOne = 1.0d0, rTwo = 2.0d0 )
 
@@ -69,9 +69,9 @@ c
          write(stdo,*) ' helas-warn  : w1 in jw3wxx is zero vector'
       endif
       if ( abs(w1(5))+abs(w1(6)).eq.rZero ) then
-         write(stdo,*) 
-     &        ' helas-error : w1 in jw3wxx has zero momentum' 
-      endif 
+         write(stdo,*)
+     &        ' helas-error : w1 in jw3wxx has zero momentum'
+      endif
       if ( abs(w2(1))+abs(w2(2))+abs(w2(3))+abs(w2(4)).eq.rZero ) then
          write(stdo,*) ' helas-warn  : w2 in jw3wxx is zero vector'
       endif
@@ -86,24 +86,26 @@ c
          write(stdo,*)
      &        ' helas-error : w3 in jw3wxx has zero momentum'
       endif
-      if ( g1.eq.rZero ) then
-         write(stdo,*) ' helas-error : g1 in jw3wxx is zero coupling'
-      endif
-      if ( g2.eq.rZero ) then
-         write(stdo,*) ' helas-error : g2 in jw3wxx is zero coupling'
-      endif
-      if ( g1.lt.rZero ) then
-         write(stdo,*)
-     &        ' helas-warn  : g1 in jw3wxx is non-standard coupling'
-         write(stdo,*)
-     &        '             : g1 = ',g1
-      endif
-      if ( g2.lt.rZero ) then
-         write(stdo,*)
-     &        ' helas-warn  : g2 in jw3wxx is non-standard coupling'
-         write(stdo,*)
-     &        '             : g2 = ',g2
-      endif
+c     Neil edited this file to allow 3-site couplings.
+c      if ( g1.eq.rZero ) then
+c         write(stdo,*) ' helas-error : g1 in jw3wxx is zero coupling'
+c      endif
+c      if ( g2.eq.rZero ) then
+c         write(stdo,*) ' helas-error : g2 in jw3wxx is zero coupling'
+c      endif
+c      if ( g1.lt.rZero ) then
+c         write(stdo,*)
+c     &        ' helas-warn  : g1 in jw3wxx is non-standard coupling'
+c         write(stdo,*)
+c     &        '             : g1 = ',g1
+c      endif
+c      if ( g2.lt.rZero ) then
+c         write(stdo,*)
+c     &        ' helas-warn  : g2 in jw3wxx is non-standard coupling'
+c         write(stdo,*)
+c     &        '             : g2 = ',g2
+c      endif
+c     End Neil's edit.
       if ( vmass.lt.rZero ) then
          write(stdo,*) ' helas-error : vmass in jw3wxx is negative'
          write(stdo,*) '             : vmass = ',vmass
@@ -147,7 +149,17 @@ c
       q(3) = -(p1(3)+p2(3)+p3(3))
 
       q2 = q(0)**2 -(q(1)**2 +q(2)**2 +q(3)**2)
-      dg2 = dble(g1)*dble(g2)
+c     Neil edited this to allow 3-site couplings.
+c     Now only g1 is important.  g2 does nothing.
+c      dg2 = dble(g1)*dble(g2)
+c      dg2 = dble(g1)
+c     End Neil's edit.
+
+c Benj's modif in order to have FR running
+      if(g1.eq.rzero) dg2=g2
+      if(g2.eq.rzero) dg2=g1
+c End of Benj'S modif
+
       dmv = dble(vmass)
       dwv = dble(vwidth)
       mv2 = dmv**2
@@ -186,7 +198,7 @@ c      dv = rOne/dcmplx( q2-mv2 , max(dwv*q2/dmv,rZero) )
       w32=dw3(0)*dw2(0)-dw3(1)*dw2(1)-dw3(2)*dw2(2)-dw3(3)*dw2(3)
 
       w13=dw1(0)*dw3(0)-dw1(1)*dw3(1)-dw1(2)*dw3(2)-dw1(3)*dw3(3)
-      
+
       j4(0) = dg2*( dw1(0)*w32 + dw3(0)*w12 - rTwo*dw2(0)*w13 )
       j4(1) = dg2*( dw1(1)*w32 + dw3(1)*w12 - rTwo*dw2(1)*w13 )
       j4(2) = dg2*( dw1(2)*w32 + dw3(2)*w12 - rTwo*dw2(2)*w13 )
@@ -203,7 +215,7 @@ c     Fabio's implementation of the fixed width
          cm2=dcmplx( mv2, -dmv*dwv)
 c     jq = (jj(0)*q(0)-jj(1)*q(1)-jj(2)*q(2)-jj(3)*q(3))/mv2
          jq = (jj(0)*q(0)-jj(1)*q(1)-jj(2)*q(2)-jj(3)*q(3))/cm2
-         
+
          jw3w(1) = dcmplx( (jj(0)-jq*q(0))*dv )
          jw3w(2) = dcmplx( (jj(1)-jq*q(1))*dv )
          jw3w(3) = dcmplx( (jj(2)-jq*q(2))*dv )

@@ -9,7 +9,7 @@ CEPGEN_LIBS_DIR := $(or $(CEPGEN_LIBS_DIR), $(CEPGEN_PATH)/lib64)
 CEPGEN_INCLUDE_DIR := $(or $(CEPGEN_INCLUDE_DIR), $(CEPGEN_PATH)/include)
 
 FF := $(or $(FF), gfortran)
-FFLAGS=-I$(CEPGEN_INCLUDE_DIR) -L$(CEPGEN_LIBS_DIR) -lCepGenCore -fPIC
+FFLAGS=-I$(CEPGEN_INCLUDE_DIR) -L$(CEPGEN_LIBS_DIR) -lCepGenCore -fPIC -cpp
 CFLAGS=-I$(CEPGEN_INCLUDE_DIR) -L$(CEPGEN_LIBS_DIR) -lCepGenCore -fPIC -std=c++14 -Wall -pedantic
 
 .PHONY: lib clean
@@ -17,11 +17,12 @@ CFLAGS=-I$(CEPGEN_INCLUDE_DIR) -L$(CEPGEN_LIBS_DIR) -lCepGenCore -fPIC -std=c++1
 lib: $(LIB)
 
 %.f.o: %.f
-	echo $(FSRC)
-	$(FF) $(FFLAGS) $< -c -o $@
+	@echo "Building $<"
+	@$(FF) $(FFLAGS) $< -c -o $@
 
 $(LIB): $(FOBJ) MadGraphProcess.cpp
-	$(CC) $(CFLAGS) $^ -shared -o $@
+	@echo "Linking everything together into $@"
+	@$(CC) $(CFLAGS) $^ -shared -o $@
 
 clean:
 	$(RM) -f *.o HELAS/*.o $(LIB)

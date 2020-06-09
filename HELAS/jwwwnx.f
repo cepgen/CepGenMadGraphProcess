@@ -1,4 +1,4 @@
-      subroutine jwwwxx(w1,w2,w3,gwwa,gwwz,wmass,wwidth , jwww)
+      subroutine jwwwnx(w1,w2,w3,gwwa,gwwz,wmass,wwidth , jwww)
 c
 c This subroutine computes an off-shell W+/W- current from the four-
 c point gauge boson coupling.  The vector propagators for the output
@@ -27,7 +27,7 @@ c where all the bosons are defined by the flowing-OUT quantum number.
 c
 c output:
 c       complex jwww(6)        : W current             j^mu(w':w1,w2,w3)
-c     
+c
       implicit none
       double complex w1(6),w2(6),w3(6),jwww(6)
       double complex dw1(0:3),dw2(0:3),dw3(0:3),jj(0:3)
@@ -36,7 +36,7 @@ c
       double precision gwwa,gwwz,wmass,wwidth
       double precision p1(0:3),p2(0:3),p3(0:3),q(0:3)
       double precision dgwwa2,dgwwz2,dgw2,dmw,dww,mw2,q2
-
+      double complex cZero
       double precision rZero, rOne, rTwo
       parameter( rZero = 0.0d0, rOne = 1.0d0, rTwo = 2.0d0 )
 
@@ -66,19 +66,21 @@ c
       if ( abs(w3(5))+abs(w3(6)).eq.rZero ) then
          write(stdo,*)
      &        ' helas-error : w3 in jwwwxx has zero momentum'
-      endif 
-      if ( gwwa.eq.rZero ) then
-         write(stdo,*) ' helas-error : gwwa in jwwwxx is zero coupling'
       endif
-      if ( gwwz.eq.rZero ) then
-         write(stdo,*) ' helas-error : gwwz in jwwwxx is zero coupling'
-      endif
-      if ( gwwa.lt.rZero .or. gwwa.ge.gwwz ) then
-         write(stdo,*)
-     &  ' helas-warn  : gwwa/gwwz in jwwwxx are non-standard couplings'
-         write(stdo,*)
-     &  '             : gwwa = ',gwwa,'  gwwz = ',gwwz
-      endif
+c     Neil edited the following to allow 3-site couplings.
+c      if ( gwwa.eq.rZero ) then
+c         write(stdo,*) ' helas-error : gwwa in jwwwxx is zero coupling'
+c      endif
+c      if ( gwwz.eq.rZero ) then
+c         write(stdo,*) ' helas-error : gwwz in jwwwxx is zero coupling'
+c      endif
+c      if ( gwwa.lt.rZero .or. gwwa.ge.gwwz ) then
+c         write(stdo,*)
+c     &  ' helas-warn  : gwwa/gwwz in jwwwxx are non-standard couplings'
+c         write(stdo,*)
+c     &  '             : gwwa = ',gwwa,'  gwwz = ',gwwz
+c      endif
+c     End Neil's edit
       if ( wmass.le.rZero ) then
          write(stdo,*) ' helas-error : wmass in jwwwxx is not positive'
          write(stdo,*) '             : wmass = ',wmass
@@ -88,6 +90,9 @@ c
          write(stdo,*) '             : wwidth = ',wwidth
       endif
 #endif
+
+
+
 
       jwww(5) = w1(5)+w2(5)+w3(5)
       jwww(6) = w1(6)+w2(6)+w3(6)
@@ -121,9 +126,22 @@ c
       q(2) = -(p1(2)+p2(2)+p3(2))
       q(3) = -(p1(3)+p2(3)+p3(3))
       q2 = q(0)**2 -(q(1)**2 +q(2)**2 +q(3)**2)
-      dgwwa2 = dble(gwwa)**2
-      dgwwz2 = dble(gwwz)**2
-      dgw2 = dgwwa2+dgwwz2
+c     Neil edited this file to allow implementation of 3-site model.
+c     Now, only gwwa matters and is the full coupling squared.
+c      dgwwa2 = dble(gwwa)**2
+c      dgwwz2 = dble(gwwz)**2
+c      dgw2 = dgwwa2+dgwwz2
+c      dgw2 = gwwa
+c     End Neil's edit
+
+c Benj's modif in order to have FR running
+      dgw2=rZero
+      if(gwwa.eq.rZero) dgw2=gwwz
+      if(gwwz.eq.rZero) dgw2=gwwa
+c End of Benj'S modif
+
+
+
       dmw = dble(wmass)
       dww = dble(wwidth)
       mw2 = dmw**2
@@ -149,7 +167,10 @@ c
       endif
 #endif
 
-      dw = -rOne/dcmplx( q2-mw2, dmw*dww )
+c Start of Claude'S modif (Removed minus Sign)
+      dw = rOne/dcmplx( q2-mw2, dmw*dww )
+c End of Claude'S modif
+
 c  For the running width, use below instead of the above dw.
 c      dw = -rOne/dcmplx( q2-mw2 , max(dww*q2/dmw,rZero) )
 

@@ -18,7 +18,7 @@ c
       double precision q(0:3),smass,swidth,q2
 
 #ifdef HELAS_CHECK
-      double precision rZero, cZero
+      double precision rZero
       parameter( rZero = 0.0d0 )
       double complex cZero
       parameter( cZero = ( 0.0d0, 0.0d0 ) )
